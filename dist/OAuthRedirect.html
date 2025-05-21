@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script defer>
+        const state = window.location.hash.replace(/^#/, '');
+        const params = new URLSearchParams(state);
+        // Query params take precedence over fragment
+        new URLSearchParams(window.location.search).forEach((v, k) => params.set(k, v));
+        let url = window.location.origin + window.location.pathname.replace(/[^\/]+$/, 'chat.html');
+        if (params.has('state')) url += `#${decodeURIComponent(params.get('state'))}`;
+        const source = params.get('source');
+        if (!source) {
+            document.body.innerText = "missing source";
+            throw "missing source";
+        }
+        if (params.has('access_token')) {
+            localStorage.setItem(source + "Token", params.get('access_token'));
+            if (params.has('expires_in')) localStorage.setItem(source + 'TokenExpires', Math.floor(Date.now() / 1000) +
+                    parseInt(params.get('expires_in')));
+        }
+        console.info(`Redirecting to ${url}`);
+        window.location.href = url;
+    </script>
+</head>
+<body>
+Redirecting..
+</body>
+</html>

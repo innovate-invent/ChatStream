@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatStream OBS Chat Overlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #0e0e0e;
+      color: #ffffff;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    #demo {
+      width: 60%;
+      max-width: 500px;
+      height: 200px;
+      border: none;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 0.2em;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin-top: 2em;
+    }
+
+    p {
+      font-size: 1.1em;
+      margin: 1em 0;
+    }
+
+    a {
+      color: #00bcd4;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 4em;
+      font-size: 0.9em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>ChatStream OBS Chat Overlay</h1>
+  <iframe id="demo" src="chat.html#demo"></iframe>
+  <p>
+    ChatStream is an OBS Studio overlay that provides streamers and content creators a means of integrating their viewers' real time chat directly into the video stream. This provides viewers with an added level of interactivity with the stream content.
+  </p>
+  <p>
+    A client application that directly accesses the streaming platform's API via the streamer's OAuth credentials. You don't need to depend on a third parties servers to keep your stream or recording going.
+  </p>
+  <p>
+    ChatStream combines Twitch, YouTube, and Discord chats into a single stream. It can be embedded into a video stream via OBS Browser Source or used on its own. It also provides a basic TTS system when selecting a chat message.
+  </p>
+  <p>
+    See the <a href="https://chatstream.i2labs.ca/instructions.html" target="_blank">instructions</a> for information on use.
+  </p>
+  <p>
+    Submit bug reports or feature requests <a href="https://github.com/innovate-invent/ChatStream/issues">here</a>.
+  </p>
+  <div class="footer">
+    &copy; 2025 Nolan Woods, i2labs
+    <p><a href="tos.html">License, Terms of Service, &amp; Privacy Policy</a></p>
+  </div>
+</div>
+</body>
+</html>
