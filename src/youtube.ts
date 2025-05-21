@@ -1,0 +1,286 @@
+import {StreamMessage} from "./StreamMessage";
+import {addSource} from "./index.js";
+
+const liveChatEndpoint = 'https://www.googleapis.com/youtube/v3/liveChat/messages?profileImageSize=16&maxResults=20';
+const liveBroadcastsEndpoint = 'https://www.googleapis.com/youtube/v3/liveBroadcasts';
+const minimumPollingInterval = 10000;
+
+interface LiveChatMessage {
+    kind: "youtube#liveChatMessage",
+    etag: string,
+    id: string,
+    snippet: {
+        type: string,
+        liveChatId: string,
+        authorChannelId: string,
+        publishedAt: string,
+        hasDisplayContent: boolean,
+        displayMessage: string,
+        fanFundingEventDetails: {
+            amountMicros: number,
+            currency: string,
+            amountDisplayString: string,
+            userComment: string
+        },
+        textMessageDetails: {
+            messageText: string
+        },
+        messageDeletedDetails: {
+            deletedMessageId: string
+        },
+        userBannedDetails: {
+            bannedUserDetails: {
+                channelId: string,
+                channelUrl: string,
+                displayName: string,
+                profileImageUrl: string
+            },
+            banType: string,
+            banDurationSeconds: number
+        },
+        memberMilestoneChatDetails: {
+            userComment: string,
+            memberMonth: number,
+            memberLevelName: string
+        },
+        newSponsorDetails: {
+            memberLevelName: string,
+            isUpgrade: boolean
+        },
+        superChatDetails: {
+            amountMicros: number,
+            currency: string,
+            amountDisplayString: string,
+            userComment: string,
+            tier: number
+        },
+        superStickerDetails: {
+            superStickerMetadata: {
+                stickerId: string,
+                altText: string,
+                language: string
+            },
+            amountMicros: number,
+            currency: string,
+            amountDisplayString: string,
+            tier: number
+        },
+        pollDetails: {
+            metadata: {
+                options: {
+                    optionText: string,
+                    tally: string,
+                },
+                questionText: string,
+                status: string
+            },
+        },
+        membershipGiftingDetails: {
+            giftMembershipsCount: number,
+            giftMembershipsLevelName: string
+        },
+        giftMembershipReceivedDetails: {
+            memberLevelName: string,
+            gifterChannelId: string,
+            associatedMembershipGiftingMessageId: string
+        },
+    },
+    authorDetails: {
+        channelId: string,
+        channelUrl: string,
+        displayName: string,
+        profileImageUrl: string,
+        isVerified: boolean,
+        isChatOwner: boolean,
+        isChatSponsor: boolean,
+        isChatModerator: boolean
+    },
+}
+
+interface LiveChatMessageListResponse {
+    kind: "youtube#liveChatMessageListResponse"
+    etag: string
+    nextPageToken: string
+    pollingIntervalMillis: number
+    offlineAt: string
+    pageInfo: {
+        totalResults: number
+        resultsPerPage: number
+    }
+    items: LiveChatMessage[]
+    activePollItem: LiveChatMessage
+}
+
+interface LiveBroadcast {
+    kind: "youtube#liveBroadcast",
+    etag: string,
+    id: string,
+    snippet: {
+        publishedAt: string,
+        channelId: string,
+        title: string,
+        description: string,
+        thumbnails: {
+            [key: string]: {
+                url: string,
+                width: number,
+                height: number
+            }
+        },
+        scheduledStartTime: string,
+        scheduledEndTime: string,
+        actualStartTime: string,
+        actualEndTime: string,
+        isDefaultBroadcast: boolean,
+        liveChatId: string
+    },
+    status: {
+        lifeCycleStatus: string,
+        privacyStatus: string,
+        recordingStatus: string,
+        madeForKids: string,
+        selfDeclaredMadeForKids: string,
+    },
+    contentDetails: {
+        boundStreamId: string,
+        boundStreamLastUpdateTimeMs: string,
+        monitorStream: {
+            enableMonitorStream: boolean,
+            broadcastStreamDelayMs: number,
+            embedHtml: string
+        },
+        enableEmbed: boolean,
+        enableDvr: boolean,
+        recordFromStart: boolean,
+        enableClosedCaptions: boolean,
+        closedCaptionsType: string,
+        projection: string,
+        enableLowLatency: boolean,
+        latencyPreference: boolean,
+        enableAutoStart: boolean,
+        enableAutoStop: boolean
+    },
+    statistics: {
+        totalChatCount: number
+    },
+    monetizationDetails: {
+        cuepointSchedule: {
+            enabled: boolean,
+            pauseAdsUntil: string,
+            scheduleStrategy: string,
+            repeatIntervalSecs: number,
+        }
+    }
+}
+
+interface LiveBroadcastListResponse {
+    kind: "youtube#liveBroadcastListResponse",
+    etag: string
+    nextPageToken: string
+    prevPageToken: string
+    pageInfo: {
+        totalResults: number
+        resultsPerPage: number
+    },
+    items: LiveBroadcast[]
+}
+
+interface ErrorResponse {
+    code: number
+    message: string
+    errors: {
+        domain: string
+        message: string
+        reason: string
+    }[]
+}
+
+const googleAPIClientId = '178547291976-iv9nvv4hcg0ru6ern20rjpneqpmjnhtk.apps.googleusercontent.com';
+
+export async function init(renewToken = false) {
+    const state = window.location.hash.replace(/^#/, '');
+    const params = new URLSearchParams(state);
+    if (renewToken) localStorage.removeItem('youtubeToken');
+    if (!localStorage.getItem('youtubeToken') && (params.has("youtube") || renewToken)) {
+        window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' +
+            '&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile' +
+            (localStorage.getItem('youtubeUser') ? `&login_hint=${localStorage.getItem('youtubeUser')}` : '') +
+            '&include_granted_scopes=true' +
+            '&response_type=token' +
+            `&state=${encodeURIComponent(state)}` +
+            `&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname.replace(/[^\/]+$/, ''))}OAuthRedirect.html%3Fsource%3Dyoutube` +
+            `&client_id=${googleAPIClientId}`;
+    }
+    if (localStorage.getItem('youtubeToken')) {
+        const account = await (await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${localStorage.getItem('youtubeToken')}`)).json();
+        if (account.sub) localStorage.setItem('youtubeUser', account.sub);
+    }
+    console.info("Youtube init");
+}
+
+let source: AsyncGenerator<StreamMessage, void, unknown>;
+
+export async function start() {
+    const accessToken = localStorage.getItem('youtubeToken');
+    if (source) source.return();
+    if (accessToken) {
+        source = youtubeChat(accessToken);
+        addSource(source);
+    }
+    console.info("Youtube start", !!accessToken);
+    return !!accessToken;
+}
+
+export default async function* youtubeChat(accessToken: string, broadcastIndex = 0): AsyncGenerator<StreamMessage, void, unknown> {
+    let pageToken: string = '';
+    const startedAt = Date.now();
+    const myLiveBroadcasts: LiveBroadcastListResponse = await (await fetch(`${liveBroadcastsEndpoint}?part=snippet&mine=true`, {
+        method: 'GET',
+        mode: "cors",
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    })).json();
+    if (!myLiveBroadcasts.items) {
+        console.error("Youtube failed", myLiveBroadcasts);
+        return;
+    }
+    const liveChatId = myLiveBroadcasts.items[broadcastIndex].snippet.liveChatId;
+
+    try {
+        while (true) {
+            const messageList: LiveChatMessageListResponse | ErrorResponse = await (await fetch(`${liveChatEndpoint}&liveChatId=${liveChatId}&part=id&part=snippet&part=authorDetails` + (pageToken ? `&pageToken=${pageToken}` : ''), {
+                method: 'GET',
+                mode: "cors",
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })).json();
+            if ('code' in messageList) {
+                if (messageList.code === 403 && messageList.errors && messageList.errors[0] && messageList.errors[0].reason in ['liveChatEnded', 'rateLimitExceeded']) {
+                    await new Promise(res => setTimeout(res, 5000));
+                    continue;
+                }
+                throw new Error(messageList.message, {cause: messageList});
+            }
+            pageToken = messageList.nextPageToken;
+            try {
+                for (const message of messageList.items) {
+                    if (message.snippet.type !== 'textMessageEvent' || Date.parse(message.snippet.publishedAt) < startedAt) continue;
+                    yield {
+                        timestamp: Date.parse(message.snippet.publishedAt),
+                        userName: message.authorDetails.displayName,
+                        message: message.snippet.textMessageDetails.messageText,
+                        id: message.id,
+                        source: "youtube",
+                    };
+                }
+            } finally {
+                // TODO dump remaining messages if return() called
+            }
+            await new Promise(res => setTimeout(res, messageList.pollingIntervalMillis > minimumPollingInterval ? messageList.pollingIntervalMillis : minimumPollingInterval));
+        }
+    } finally {
+        console.info("Youtube stream closed");
+    }
+}

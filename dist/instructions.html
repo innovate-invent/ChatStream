@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatStream Instructions</title>
+</head>
+<body>
+<p>Thank you for your interest in the ChatStream OBS overlay. This currently supports aggregating Twitch, Youtube, and
+    Discord chat. See below for configuration instructions for each platform.</p>
+<p>ChatStream stores all credentials and information client side. Nothing is transmitted to our servers.</p>
+<p>Please report issues to <a href="https://github.com/innovate-invent/ChatStream/issues">https://github
+    .com/innovate-invent/ChatStream/issues</a></p>
+
+<p>To begin, paste the following url into a OBS browser source:
+    <a href="https://chatstream.i2labs.ca/#twitch&youtube&discordChannel=">https://chatstream.i2labs.ca/#twitch&#38;youtube&#38;discordChannel=</a>
+</p>
+<p>To disable automatic login of a platform, simply remove it from the url fragment list (including the "&amp;"
+    prefix).</p>
+<p>To log in, right click the browser source and click "Interact". <em>Do not do this while your stream is active or
+    viewers will be able to see your login credentials.</em></p>
+<p><a href="tos.html">License, Terms of Service, & Privacy Policy</a></p>
+
+<h1>Twitch</h1>
+<p>You will be automatically redirected to authenticate with Twitch. The user account that is used will
+    automatically decide the primary streams chat.</p>
+
+<h1>Youtube</h1>
+<p>You will be automatically redirected to authenticate with Youtube. The user account that is used will
+    automatically decide the primary streams chat.</p>
+
+<h1>Discord</h1>
+<p>Discord does not currently permit anything except a bot token to access its Gateway API. This means you need to
+    create your own bot and provide the bot token.</p>
+<p>"&#38;discordChannel=&#60;channel id&#62;" must be provided. To get your channel ID right click on the channel in
+    the Discord client and click "Copy Link". This will provide you with a URL of the format:
+    https://discord.com/channels/&#60;guild-server id&#62;/&#60;channel id&#62;.</p>
+
+<h2>Creating a bot token</h2>
+<ol>
+    <li>Browse to the <a href="https://discord.com/developers/applications">Discord Developer Portal</a></li>
+    <li>Click "New Application"</li>
+    <li>Name it anything (this name will be visible) and confirm the prompts</li>
+    <li>Paste your Application ID here to store in the browsers LocalStorage to avoid exposing it in the fragment
+        parameters:
+        <input type="text" oninput="localStorage.setItem('discordAppID', this.value)"></li>
+    <li>Browse to the "Installation" section on the left of the dashboard</li>
+    <li>Change "Install Link" to None</li>
+    <li>Click "Save Changes" on the pop-up</li>
+    <li>Browse to the "Bot" section on the left of the dashboard</li>
+    <li>Click "Reset Token" to generate a Bot Token</li>
+    <li>Paste your bot token here to store in the browsers LocalStorage to avoid exposing it in the fragment parameters:
+        <input type="text" oninput="localStorage.setItem('discordBotToken', this.value)"></li>
+    <li>Disable "Public Bot"</li>
+    <li>Enable "Message Content Intent"</li>
+    <li>Click "Save Changes" on the pop-up</li>
+    <li>Browse to the "OAuth2" section on the left of the dashboard</li>
+    <li>In the "OAuth2 URL Generator" select only "bot"</li>
+    <li>Scroll down to "Integration Type" and select "Guild Install"</li>
+    <li>Browse to the generated URL and follow the prompts to add the bot to your Discord Server/Guild</li>
+    <li>Done.</li>
+</ol>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatStream</title>
+    <link rel="stylesheet" href="fontawesome-free-6.7.2-web/css/brands.min.css"/>
+    <script type="importmap">
+        {"imports": {
+          "chat": "./index.js",
+          "youtube": "./youtube.js",
+          "discord": "./discord.js",
+          "twitch": "./twitch.js"
+        }}
+    </script>
+    <style>
+        ol {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            list-style-position: inside;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            color: white;
+        }
+
+        #renewFrame {
+            display: none;
+        }
+
+        #topBar {
+            display: none;
+            width: 100%;
+            background: gray;
+            position: fixed;
+        }
+
+        body:focus #topBar, body:hover #topBar {
+            display: block;
+        }
+
+        #chat {
+            #lastNode {
+                display: none;
+
+                &:only-child {
+                    display: block;
+                }
+            }
+
+            [data-source] .username::before {
+                font-family: "Font Awesome 6 Brands";
+                display: inline-block;
+                padding-right: 3px;
+                vertical-align: middle;
+                font-weight: 400;
+
+            }
+
+            [data-source=youtube] .username {
+                color: red;
+
+                &:before {
+                    content: "\f167";
+                }
+            }
+
+            [data-source=twitch] .username {
+                color: purple;
+
+                &:before {
+                    content: "\f1e8";
+                }
+            }
+
+            [data-source=discord] .username {
+                color: blue;
+
+                &:before {
+                    content: "\f392";
+                }
+            }
+        }
+    </style>
+    <script type="module" defer>
+        import * as youtubeChat from "youtube";
+        import * as twitchChat from "twitch";
+        import * as discordChat from "discord";
+        import startChat from 'chat';
+
+        discordLogin.addEventListener('click', () => {
+            discordChat.init(true)
+            return false;
+        });
+        youtubeLogin.addEventListener('click', () => {
+            youtubeChat.init(true);
+            return false;
+        });
+        twitchLogin.addEventListener('click', () => {
+            twitchChat.init(true);
+            return false;
+        });
+
+        function start() {
+            youtubeChat.start();
+            twitchChat.start();
+            discordChat.start();
+        }
+
+        window.addEventListener('hashchange', start);
+        youtubeChat.init();
+        twitchChat.init();
+        discordChat.init();
+        start();
+        startChat();
+    </script>
+</head>
+<body>
+<iframe id="renewFrame"></iframe>
+<div id="topBar">
+    <a href="instructions.html">Instructions</a>
+    <span>Login: </span>
+    <a id="discordLogin" href="#">Discord</a>
+    <a id="youtubeLogin" href="#">Youtube</a>
+    <a id="twitchLogin" href="#">Twitch</a>
+</div>
+<ol id="chat">
+    <li id="lastNode" data-timestamp="0">Waiting for messages..</li>
+</ol>
+<template id="chatmessage">
+    <li>
+        <span class="username"></span>
+        <span class="message"></span>
+    </li>
+</template>
+</body>
+</html>
