@@ -1,0 +1,97 @@
+@property --message-line-limit {
+    inherits: true;
+    initial-value: 2;
+    syntax: "<integer>";
+}
+
+#discordLogin {
+    display: none;
+}
+
+ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    list-style-position: inside;
+}
+
+html {
+    scrollbar-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    background: black;
+    color: white;
+}
+
+#renewFrame {
+    display: none;
+}
+
+#context {
+    border: 1px solid white;
+    border-radius: 3px;
+    padding: 1ch;
+    z-index: 600;
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    background: #bababa;
+    left: 0;
+    top: 0;
+}
+
+#chat [data-source] .username::before, .loginLink::before {
+    font-family: "Font Awesome 6 Brands";
+    display: inline-block;
+    padding-right: 3px;
+    vertical-align: middle;
+    font-weight: 400;
+}
+
+#chat [data-source=youtube] .username, #youtubeLogin {
+    color: red;
+
+    &:before {
+        content: "\f167";
+    }
+}
+
+#chat [data-source=twitch] .username, #twitchLogin {
+    color: purple;
+
+    &:before {
+        content: "\f1e8";
+    }
+}
+
+#chat [data-source=discord] .username, #discordLogin {
+    color: blue;
+
+    &:before {
+        content: "\f392";
+    }
+}
+
+#chat {
+    #lastNode {
+        display: none;
+
+        &:only-child {
+            display: block;
+        }
+    }
+
+    li:not(:hover) {
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        word-break: break-all;
+        max-height: calc(var(--message-line-limit) * 1lh);
+        box-sizing: border-box;
+    }
+}
