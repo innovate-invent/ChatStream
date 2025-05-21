@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatStream Instructions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet"/>
+    <link href="instructions.css" rel="stylesheet"/>
+</head>
+<body>
+<p>ChatStream is an OBS Studio overlay that provides streamers and content creators a means of integrating their viewers
+    real time chat directly into the video stream. This provides viewers with an added level of interactivity with the
+    stream content. It is a client application that directly accesses the streaming platforms API via the streamers
+    OAuth credentials.</p>
+<p>ChatStream combines Twitch, Youtube, and Discord chats into a single stream. It can be embedded into a video stream
+    via OBS Browser Source or used on its own. It provides a basic TTS system when selecting a chat message.</p>
+<p>ChatStream stores all credentials and information client side. Nothing is transmitted to our servers.</p>
+<p>Please report issues to <a href="https://github.com/innovate-invent/ChatStream/issues">https://github.com/innovate-invent/ChatStream/issues</a>
+</p>
+
+<p>To begin, paste the following URL into a OBS browser source:
+    <a href="https://chatstream.i2labs.ca/chat.html#twitch&youtube&discordChannel=">https://chatstream.i2labs.ca/chat.html#twitch&#38;youtube&#38;discordChannel=</a>.
+    If you don't want to always use the most recent changes you can use an <a href="versions.html">older version here</a>.
+</p>
+<p>To disable automatic login of a platform, simply remove it from the URL fragment list (including the "&amp;"
+    prefix).</p>
+<p>To log in, right click the browser source and click "Interact". Within the interactive view you can right-click to
+    pull up a menu to manually log into the different platforms.
+    <em>Do not do this while your stream is active or viewers will be able to see your login credentials.</em>
+    If the login prompt won't scroll, temporarily remove the
+    CSS from the OBS Browser Source configuration as it disables scrolling by default. Alternatively, use keyboard
+    navigation by pressing tab until you move to the required page element.</p>
+
+<p><a href="tos.html">License, Terms of Service, &amp; Privacy Policy</a></p>
+
+<p>To <a href="https://chatstream.i2labs.ca/chat.html#demo">test the chat overlay</a> you can add <code>&demo</code> to
+    the
+    URL fragment to start a dummy chat source. It randomly posts messages within a time range. To customise the time
+    range specify <code>&amp;demo=2000</code> setting the number to any positive integer representing the maximum
+    milliseconds between messages.</p>
+
+<p>The chat will scroll automatically at a set rate. If more messages are being sent than can be shown, the scroll speed
+    will linearly speed up to try and catch up. This can be customised by setting <code>&amp;speed=10</code> in the URL
+    fragment with any positive integer. To disable this and always show the most recent message when it is received, set
+    <code>&amp;speed=0</code>.</p>
+
+<p>If you are having some trouble with the functionality within the OBS embed and you want some extra information,
+    <code>&debug=</code> is provided to write logging information to chat. You can specify a number 0-4 or &#39;error&#39;,
+    &#39;warn&#39;, &#39;info&#39;, &#39;log&#39;, or &#39;debug&#39; respectively.</p>
+
+<p>Summary
+<ul>
+   <li><code>&twitch</code> - enable Twitch chat</li>
+   <li><code>&youtube</code> - enable Youtube chat</li>
+   <li><code>&discordChannel=</code> - enable Discord chat with a specified channel id</li>
+   <li><code>&demo=</code> - enable generating example chat data, with an optional specified message speed</li>
+   <li><code>&speed=</code> - Adjust the chat scroll speed. Setting to 0 disables scrolling.</li>
+   <li><code>&debug=</code> - Show logging information at a specified verbosity</li>
+</ul></p>
+
+<p>To customise the colors of the overlay you can add CSS to the OBS Browser Source configuration.</p>
+<p>For example: <code>body { background-color: rgba(0, 0, 0, 0); margin: 0px auto; color: gray;
+    font-size: 24px; }</code></p>
+<p>Further customisation can be done with an assortment of CSS selectors:</p>
+<ul>
+    <li><code>#chat</code> will target the direct parent of all chat messages</li>
+    <li><code>[data-source=youtube]</code> will target a message from a specific platform (twitch, youtube, discord)
+    </li>
+    <li><code>.username</code> targets the user name field of each message</li>
+    <li><code>.username:before</code> contains the platform Font Awesome 6 Brands character code</li>
+    <li><code>.message</code> targets the text field of each message</li>
+    <li>A convenience CSS parameter is provided to simplify
+        setting the message line limit: <code>#chat { --message-line-limit: 2; }</code>. Include <code>#chat li {
+            word-break: normal; }</code> to make sentences break normally.
+    </li>
+    <li>When <code>&amp;speed</code> is greater than 0, messages are tagged with <code>.old</code> after a set time that
+        roughly would coincide with the message scrolling off screen in a busy chat room.
+    </li>
+    <li>New messages are tagged with <code>.new</code> and then the class is removed one tick later to trigger CSS
+        transitions. Use this to specify the initial CSS state of a message. Specify
+        <code>--message-transition-duration</code> to change the default duration.
+    </li>
+    <li>Set <code>#chat { --name-luminance: 70%; }</code> to change the luminance value of the usernames.</li>
+    <li>The <code>--namehash</code> CSS variable is set for each username that is a simple hash of the first and last
+        character of the username. This provides a stable hue value between 0 and 360 based on the name to pick a
+        distinct color for each user.
+        Set <code>#chat .username { color: hsl(var(--namehash) 100% var(--name-luminance)); }</code> to customise the
+        color.
+    </li>
+</ul>
+
+
+<h1>Speech Synth</h1>
+<p>ChatStream supports basic speech synthesis by clicking on a message to be read in the OBS Interactive view.</p>
+<p>Speech synthesis depends on the standard <a
+        href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis">Web Speech API</a> built into the
+    browser. It offers a few customisation options:</p>
+<label style="display: block">Voice:
+    <select id="selectedLanguage" style="display: inline-block"></select>
+    <select id="selectedVoice" style="display: inline-block"></select><span> (If this is empty then you need to launch Chrome or OBS with
+        "--enable-speech-dispatcher" command line argument. The Flatpak distribution of OBS does not support this.)
+    </span></label>
+<label>Pitch: <input id="pitch" type="number" min="0" max="2" step="0.01"></label>
+<label>Rate: <input id="rate" type="number" min="0.1" max="10" step="0.1"></label>
+<button id="testSpeech">Test</button>
+<script type="module">
+    import {speak} from "./tts.js";
+
+    testSpeech.addEventListener('click', () => speak('Testing the Web Speech API, speech synthesis system..'));
+
+    function populateVoices() {
+        const langs = new Set();
+        const currentLang = selectedLanguage.value || localStorage.getItem('synthLang');
+        const currentVoice = selectedVoice.value || localStorage.getItem('synthVoice');
+        pitch.value = localStorage.getItem('synthPitch') || 1;
+        rate.value = localStorage.getItem('synthRate') || 1;
+        selectedVoice.replaceChildren(...speechSynthesis.getVoices().filter(voice => {
+            langs.add(voice.lang);
+            return currentVoice === voice.voiceURI || voice.lang === currentLang;
+        }).map(voice => {
+            const option = document.createElement('option');
+            // The speech server seems to prefix each option with the language
+            option.textContent = voice.name.replace(/^.*\+/, '');
+            option.setAttribute("value", voice.voiceURI);
+            if (voice.voiceURI === currentVoice) option.setAttribute("selected", "true");
+            return option;
+        }));
+        selectedLanguage.replaceChildren(...Array.from(langs).sort().map(l => {
+            const option = document.createElement('option');
+            option.textContent = l;
+            option.setAttribute('value', l);
+            if (l === currentLang) option.setAttribute("selected", "true");
+            return option;
+        }));
+        selectedLanguage.value = currentLang;
+        selectedVoice.value = currentVoice;
+    }
+
+    populateVoices();
+    speechSynthesis.addEventListener('voiceschanged', populateVoices);
+    selectedLanguage.addEventListener('change', populateVoices);
+    pitch.addEventListener('change', () => {
+        if (pitch.value >= 0 && pitch.value <= 2) localStorage.setItem('synthPitch', pitch.value);
+    });
+    rate.addEventListener('change', () => {
+        if (rate.value >= 0.1 && rate.value <= 10) localStorage.setItem('synthRate', rate.value);
+    });
+    selectedVoice.addEventListener('change', () => {
+        localStorage.setItem('synthVoice', selectedVoice.value);
+        localStorage.setItem('synthLang', selectedLanguage.value);
+    });
+</script>
+
+<p>If you think the provided voices are terrible (and you are on Linux), that is because you haven't
+    installed <a href="https://github.com/rhasspy/piper">Piper</a>. Install it, and voices via <a
+            href="https://pied.mikeasoft.com/">Pied</a>.</p>
+
+<h1>Twitch</h1>
+<p>You will be automatically redirected to authenticate with Twitch. The user account that is used will
+    automatically decide the primary streams chat.</p>
+
+<h2>Twitch TOS</h2>
+<p>Twitch <a href="https://help.twitch.tv/s/article/simulcasting-guidelines?language=en_US">prohibits</a> embedding chat
+    from third parties, this means you need to use one of two workarounds:</p>
+<ol>
+    <li>
+        <p>Assuming you are using the <a
+                href="https://obsproject.com/forum/resources/multiple-rtmp-outputs-plugin.964/">Multiple RTMP outputs
+            plugin</a>, create a separate OBS Scene with a separate ChatStream overlay configuration that only shows
+            Twitch chat. In the "Multiple RTMP outputs" panel edit your Twitch target, change the encoder to something
+            appropriate (x264 is the default) and select the Scene you set up with the Twitch specific chat overlay.</p>
+        <p>You can attain limited scene switching capability using OBSs scene nesting capability. Start by creating
+            three scenes, one for Twitch with the Twitch specific overlay, one for the other platforms with their
+            configured chat overlay, and one to control the active scene. Add the control scene to the chat overlay
+            scenes, and add all your desired scenes to the control scene. Then control the "active" scene by hiding and
+            showing the scenes nested within the control scene.</p>
+    </li>
+    <li>
+        <p>If you need full featured scene switching for Twitch then you will need to run three separate instances of
+            OBS. A primary instance that does all the scene switching and primary compositing. This will only run a
+            virtual camera output. The two other instances will take the virtual camera input and overlay ChatStream,
+            one with the Twitch restriction and the other with no chat restrictions.</p>
+    </li>
+</ol>
+
+<h1>Youtube</h1>
+<p>You will be automatically redirected to authenticate with Youtube. The user account that is used will
+    automatically decide the primary streams chat.</p>
+
+<p>If you have multiple broadcasts, you may need to set <code>&youtubeBroadcastIndex=1</code> (or a higher number)
+    in the URL to get the correct chat stream.</p>
+
+<h1>Discord</h1>
+<p>Discord does not currently permit anything except a bot token to access its Gateway API. This means you need to
+    create your own bot and provide the bot token.</p>
+<p><code>&amp;discordChannel=[channel id]</code> must be provided. To get your channel ID, right-click on the channel in
+    the Discord client and click "Copy Link". This will provide you with a URL of the format:
+    <code>https://discord.com/channels/[guild-server id]/[channel id]</code>.</p>
+
+<h2>Creating a bot token</h2>
+<ol>
+    <li>Browse to the <a href="https://discord.com/developers/applications">Discord Developer Portal</a></li>
+    <li>Click "New Application"</li>
+    <li>Name it anything (this name will be visible) and confirm the prompts</li>
+    <li>Paste your Application ID here to store in the browsers LocalStorage to avoid exposing it in the fragment
+        parameters:
+        <input type="text" oninput="localStorage.setItem('discordAppID', this.value)"></li>
+    <li>Browse to the "Installation" section on the left of the dashboard</li>
+    <li>Change "Install Link" to None</li>
+    <li>Click "Save Changes" on the pop-up</li>
+    <li>Browse to the "Bot" section on the left of the dashboard</li>
+    <li>Click "Reset Token" to generate a Bot Token</li>
+    <li>Paste your bot token here to store in the browsers LocalStorage to avoid exposing it in the fragment parameters:
+        <input type="text" oninput="localStorage.setItem('discordBotToken', this.value)"></li>
+    <li>Disable "Public Bot"</li>
+    <li>Enable "Message Content Intent"</li>
+    <li>Click "Save Changes" on the pop-up</li>
+    <li>Browse to the "OAuth2" section on the left of the dashboard</li>
+    <li>In the "OAuth2 URL Generator" select only "bot"</li>
+    <li>Scroll down to "Integration Type" and select "Guild Install"</li>
+    <li>Browse to the generated URL and follow the prompts to add the bot to your Discord Server/Guild</li>
+    <li>Done.</li>
+</ol>
+
+</body>
+</html>

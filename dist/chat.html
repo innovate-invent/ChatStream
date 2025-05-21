@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatStream</title>
+    <link rel="stylesheet" href="./fontawesome-free-6.7.2-web/css/all.min.css"/>
+    <script type="importmap">
+        {"imports": {
+          "chat": "./chat.js",
+          "youtube": "./youtube.js",
+          "discord": "./discord.js",
+          "twitch": "./twitch.js",
+          "demo": "./demo.js",
+          "debug": "./debug.js"
+        }}
+    </script>
+    <link rel="stylesheet" href="./chat.css" />
+    <script type="module" defer>
+        import * as youtubeChat from "youtube";
+        import * as twitchChat from "twitch";
+        import * as discordChat from "discord";
+        import * as demoChat from "demo";
+        import * as debugChat from "debug";
+        import startChat from 'chat';
+        document.addEventListener('contextmenu', event=>{
+            context.style.left = (event.pageX - 20) + 'px';
+            context.style.top = (event.pageY - 20) + 'px';
+            context.style.display = 'flex';
+            event.preventDefault();
+        });
+        context.addEventListener('mouseleave', ()=>{
+            context.style.display = 'none';
+        })
+        document.getElementById('discordLogin').addEventListener('click', event => {
+            discordChat.init(true);
+            event.preventDefault();
+        });
+        document.getElementById('youtubeLogin').addEventListener('click', event => {
+            youtubeChat.init(true);
+            event.preventDefault();
+        });
+        document.getElementById('twitchLogin').addEventListener('click', event => {
+            twitchChat.init(true);
+            event.preventDefault();
+        });
+        document.getElementById('unlinkYoutube').addEventListener('click', event => {
+            youtubeChat.clearToken();
+            return true;
+        });
+        if (window.navigator.userAgent.includes(" OBS/")) document.body.classList.add('obs');
+
+        function start() {
+            debugChat.start();
+            youtubeChat.start();
+            twitchChat.start();
+            discordChat.start();
+            demoChat.start();
+        }
+
+        debugChat.init()
+            .then(()=>youtubeChat.init())
+            .then(()=>twitchChat.init())
+            .then(()=>discordChat.init())
+            .then(()=>demoChat.init())
+            .then(()=>{
+                window.addEventListener('hashchange', start);
+                start();
+            });
+        startChat();
+    </script>
+</head>
+<body lang="en">
+<div id="context">
+    <a href="./instructions.html">Instructions &amp; Config</a>
+    <a id="discordLogin" class="loginLink" href="#">Discord</a>
+    <a id="twitchLogin" class="loginLink" href="#">Login Twitch</a>
+    <a id="youtubeLogin" class="loginLink" href="#">Login YouTube</a>
+    <a id="unlinkYoutube" href="https://myaccount.google.com/connections">Unlink Youtube</a>
+</div>
+<ol id="chat">
+    <li id="lastNode" data-timestamp="0">Waiting for messages (Right-click for menu)..</li>
+</ol>
+<template id="chatmessage">
+    <li data-source="" data-timestamp="">
+        <span class="username"></span>
+        <span class="message"></span>
+    </li>
+</template>
+</body>
+</html>
